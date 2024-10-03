@@ -1,9 +1,12 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"; //npx expo install @react-navigation/native; npx expo install react-native-screens react-native-safe-area-context
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image, StyleSheet, View } from "react-native";
+import { propsNavigationStack } from "@/tipos/navigation";
 import Index from "./index";
 import Cronograma from "./telas/cronograma";
 import Comunidade from "./telas/comunidade";
+import Login from "./telas/login";
+import Cadastro from "./telas/cadastro";
 import Calendario from "./telas/calendario";
 import Menu from "./telas/menu";
 
@@ -127,7 +130,7 @@ const Stack = createNativeStackNavigator(); //é aquele espaço branco que apare
 export function TelaInicial() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "index" component = {Index} />
+      <Stack.Screen name = "Index" component = {Index} />
     </Stack.Navigator>
   )
 }
@@ -137,7 +140,7 @@ export function TelaInicial() {
 export function TelaCronograma() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "telas/cronograma" component = {Cronograma} />
+      <Stack.Screen name = "Cronograma" component = {Cronograma} />
     </Stack.Navigator>
   )
 }
@@ -147,7 +150,9 @@ export function TelaCronograma() {
 export function TelaComunidade() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "telas/comunidade" component = {Comunidade} />
+      <Stack.Screen name = "Comunidade" component = {Comunidade} />
+      <Stack.Screen name = "Cadastro" component = {Cadastro} />
+      <Stack.Screen name = "Login" component = {Login} />
     </Stack.Navigator>
   )
 }
@@ -157,7 +162,7 @@ export function TelaComunidade() {
 export function TelaCalendario() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "telas/calendario" component = {Calendario} />
+      <Stack.Screen name = "Calendario" component = {Calendario} />
     </Stack.Navigator>
   )
 }
@@ -167,7 +172,7 @@ export function TelaCalendario() {
 export function TelaMenu() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "telas/menu" component = {Menu} />
+      <Stack.Screen name = "Menu" component = {Menu} />
     </Stack.Navigator>
   )
 }
