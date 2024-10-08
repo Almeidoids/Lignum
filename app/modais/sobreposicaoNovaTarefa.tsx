@@ -4,34 +4,57 @@ import styles from "../estilos/sobreposicoes";
 import { useFonts } from "expo-font";
 import { Text, RadioButton } from "react-native-paper";
 import { DateTimePickerAndroid, DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import DateTimePicker from "@react-native-community/datetimepicker"
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
+import { imagens } from "@/constants/imagens";
 
 if (Platform.OS == "android" && UIManager.setLayoutAnimationEnabledExperimental) { //diz para o Android aceitar animações do LayoutAnimation
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-export default function SobreposicaoNovaTarefa() {
+interface Informacoes {
+    aoSelecionar : (nome : string,
+                    textoCategorias : string,
+                    backgroundCategorias : string,
+                    imagemCard : ImageSourcePropType | undefined,
+                    prioridade : number,
+                    textoData : string,
+                    chequePendente : boolean,
+                    descricao : string,
+                    textoSemana : string[],
+                    horario : string,
+                    horarioCriado : Dayjs) => void;
+    modalVisivel : boolean
+}
+export default function SobreposicaoNovaTarefa({aoSelecionar, modalVisivel} : Informacoes) {
 
     const [nome, setNome] = useState("")
 
     const [textoCategorias, setTextoCategorias] = useState("");
 
+    const [backgroundCategorias, setBackgroundCategorias] = useState("");
+
+    const [imagemCard, setImagemCard] = useState<ImageSourcePropType | undefined>()
+
     const [prioridade, setPrioridade] = useState(3);
 
     const [textoData, setTextoData] = useState("");
 
+    const [chequePendente, setchequePendente] = useState(false);
+
+    const [descricao, setDescricao] = useState("");
+
     const [textoTipo, setTextoTipo] = useState("Sim ou não (Padrão)");
 
+    const [textoSemana, setTextoSemana] = useState<string[]>([]);
+
     const [subtarefa, setSubtarefa] = useState(false);
+
+    const [horario, setHorario] = useState("")
 
     const [modalCategoriasVisivel, setModalCategoriasVisivel] = useState(false);
 
     const [animacaoDropdown, setAnimacaoDropdown] = useState(false);
 
     const [chequeData, setchequeData] = useState(false);
-
-    const [chequePendente, setchequePendente] = useState(false);
 
     const [chequeFrequencia, setchequeFrequencia] = useState("primeiro");
 
@@ -67,6 +90,10 @@ export default function SobreposicaoNovaTarefa() {
 
     const [modalSubtarefasVisivel, setModalSubtarefasVisivel] = useState(false);
 
+    const [legendaHorario, setLegendaHorario] = useState("  :  ")
+
+    const [horarioCalendario, setHorarioCalendario] = useState(new Date())
+
     const [Fontes] = useFonts({
         "Julius-Sans-One": require("../../assets/fonts/JuliusSansOne-Regular.ttf"),
         "Inter": require("../../assets/fonts/Inter/static/Inter-Regular.ttf"),
@@ -81,7 +108,17 @@ export default function SobreposicaoNovaTarefa() {
         setLegendaCalendario(dayjs(data).format("DD/MM/YYYY"));
         const dataAtual : Date = data as Date
         setDataCalendario(dataAtual);
-        setTextoData(legendaCalendario);
+
+        setTextoData(dayjs(data).format("DD/MM/YYYY"));
+    }
+
+    const onChangeHorario = (event : DateTimePickerEvent, hora : Date | undefined) => {
+        setLegendaHorario(dayjs(hora).format("HH:mm"));
+        const horarioAtual : Date = hora as Date
+        setHorarioCalendario(horarioAtual);
+
+        setHorario(dayjs(hora).format("HH:mm"));
+        console.log(horario);
     }
 
     const mostrarModalCategoria = () => {
@@ -116,12 +153,85 @@ export default function SobreposicaoNovaTarefa() {
         })
     }
 
-    const pegarPropsCategorias = (novaLegenda : string, novaImagem : ImageSourcePropType) => { //Pega as propriedades do modal das categorias e os armazena nas variaveis
+    const pegarPropsCategorias = (novaLegenda : string, novaImagem : ImageSourcePropType, corFundo : string) => { //Pega as propriedades do modal das categorias e os armazena nas variaveis
         setLegendaCategorias(novaLegenda);
         setImagemCategorias(novaImagem);
         setModalCategoriasVisivel(!modalCategoriasVisivel)
 
         setTextoCategorias(novaLegenda);
+        setBackgroundCategorias(corFundo);
+        
+        if (imagens.treino.nomeImagem === novaLegenda) {
+            setImagemCard(imagens.treino.uri);
+        }
+        
+        else if (imagens.social.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.social.uri);
+        }
+
+        else if (imagens.nutricao.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.nutricao.uri);
+        }
+
+        else if (imagens.cuidados.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.cuidados.uri);
+        }
+
+        else if (imagens.animais.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.animais.uri);
+        }
+
+        else if (imagens.bemEstar.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.bemEstar.uri);
+        }
+
+        else if (imagens.estudos.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.estudos.uri);
+        }
+
+        else if (imagens.trabalho.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.trabalho.uri);
+        }
+
+        else if (imagens.casa.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.casa.uri);
+        }
+
+        else if (imagens.religiao.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.religiao.uri);
+        }
+
+        else if (imagens.esportes.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.esportes.uri);
+        }
+
+        else if (imagens.familia.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.familia.uri);
+        }
+
+        else if (imagens.saude.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.saude.uri);
+        }
+
+        else if (imagens.relacao.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.relacao.uri);
+        }
+
+        else if (imagens.lazer.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.lazer.uri);
+        }
+
+        else if (imagens.natureza.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.natureza.uri);
+        }
+
+        else if (imagens.financeiro.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.financeiro.uri);
+        }
+
+        else if (imagens.outros.nomeImagem == novaLegenda) {
+            setImagemCard(imagens.outros.uri);
+        }
     } //As variaveis que foram alteradas aqui serão utilizadas lá embaixo para alterar o texto e a imagem do botão categorias
 
     const pegarPropsPrioridades = (novoNumero : number) => {
@@ -147,43 +257,41 @@ export default function SobreposicaoNovaTarefa() {
         }
     }
 
-    const Data = [{
-            id: "domingo",
-            valor: dayjs().day(0),
-            legenda: "D"
-        },
-        {
-            id: "segunda",
-            valor: dayjs().day(1),
-            legenda: "S"
-        },
-        {
-            id: "terca",
-            valor: dayjs().day(2),
-            legenda: "T"
-        },
-        {
-            id: "quarta",
-            valor: dayjs().day(3),
-            legenda: "Q"
-        },
-        {
-            id: "quinta",
-            valor: dayjs().day(4),
-            legenda: "Q"
-        },
-        {
-            id: "sexta",
-            valor: dayjs().day(5),
-            legenda: "S"
-        },
-        {
-            id: "sabado",
-            valor: dayjs().day(6),
-            legenda: "S"
+    const pegarPropsSemana = (novaLegenda : string) => {
+        setTextoSemana((valorAnterior) => [...valorAnterior, novaLegenda]);
+        
+        textoSemana.forEach(function(valor, n) {
+            if (novaLegenda.includes(valor) === true) {
+                setTextoSemana((valorAnterior) => {
+                    return valorAnterior.filter(item => item !== valor)
+                });
+            }
+        })
         }
+
+    const Data = [
+        { id: "domingo", legenda: "D" },
+        { id: "segunda", legenda: "S" },
+        { id: "terca", legenda: "T"   },
+        { id: "quarta", legenda: "Q"  },
+        { id: "quinta", legenda: "Q"  },
+        { id: "sexta", legenda: "S"   },
+        { id: "sabado", legenda: "S"  }
     ]
 
+    const Clique = () => {
+
+        if (nome === "" || textoCategorias === "") {
+            alert("Insira os dados corretamente");
+        }
+
+        else {
+            aoSelecionar(nome, textoCategorias, backgroundCategorias, imagemCard, prioridade, 
+                    textoData, chequePendente, descricao, textoSemana, horario, dayjs())
+            
+            modalVisivel = true;
+        }
+    }
     return (
         <ScrollView style = {styles.telaFundo}>
             <Text variant = "displaySmall" style = {estiloFontes.displaySmall}>Nova Tarefa</Text>
@@ -294,6 +402,8 @@ export default function SobreposicaoNovaTarefa() {
                         cursorColor={"#fff"}
                         multiline = {true}
                         maxLength={164}
+                        onChangeText = {setDescricao}
+                        value = {descricao}
                     />
                     <Image source = {require("../../assets/images/icones_Tela_inicial/iconeDescricao.png")} style = {styles.iconeDescricao} />
                 </View>
@@ -363,22 +473,38 @@ export default function SobreposicaoNovaTarefa() {
             {chequeFrequencia == "segundo" && 
                 <FlatList
                     data = {Data}
-                    renderItem = {({item}) => <Semanas legenda = {item.legenda} />}
+                    renderItem = {({item}) => <Semanas legenda = {item.legenda} aoSelecionar={pegarPropsSemana} id = {item.id} />}
                     keyExtractor = {item => item.id}
                     horizontal = {true}
                     contentContainerStyle = {{flex: 1, justifyContent: "center"}}
                     style = {{alignSelf: "center"}}
                 />
             }
-
             <View style = {styles.espacoLetra}>
                 <Text style = {estiloFontes.TitleLarge}>Lembrete</Text>
                 <Text style = {estiloFontes.labelLarge}>Defina um horário de notificação para a tarefa.</Text>
+
+                <View style = {styles.espacoCaixa}>
+                    <View style = {{alignSelf: "center"}}>
+                        <Image source={require("../../assets/images/icones_Tela_inicial/iconeLembrete.png")} style = {styles.iconeCalendario} />
+                        <Text 
+                        style = {[styles.dataAlvo, {fontFamily: "Julius-Sans-One", fontSize: 25}]}
+                        onPress={() => {
+                            DateTimePickerAndroid.open({
+                                value: horarioCalendario,
+                                onChange: (onChangeHorario),
+                                mode: "time",
+                                display: "spinner",
+                            })
+                        }}>{legendaHorario}</Text>
+                    </View>
+                </View>
             </View>
+            <Pressable style = {styles.botao_voltar} onPress = {() => (Clique())}>
+                <Image source = {require("../../assets/images/botoes/botaoProximo.png")} style = {{height: 60, width: 60}}/>
+            </Pressable>
 
-            <View style = {{height: 300}} />
         </ScrollView>
-
     )
 }
 
@@ -420,7 +546,8 @@ const BotaoSubTarefas = forwardRef<View ,BotaoSubTarefaProps>(({numero, acao}, r
 
 interface Selecionar {
     aoSelecionar : (legenda : string,
-                imagem: ImageSourcePropType) => void;
+                imagem: ImageSourcePropType,
+                backgroundColor: string) => void;
     style : StyleProp<ViewStyle>
 }
 
@@ -434,77 +561,92 @@ export function ModalCategorias({aoSelecionar, style} : Selecionar) {
                 <OpcoesCategorias 
                     legenda = "Treino" 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeTreino.png")} 
-                    acao = {() => (aoSelecionar("treino", require("../../assets/images/icones_Tela_inicial/iconeTreino.png")))}/>
+                    acao = {() => (aoSelecionar("Treino", require("../../assets/images/icones_Tela_inicial/iconeTreino.png"), "#5D4EBF"))}/>
 
                 <OpcoesCategorias 
                     legenda = "Social" 
-                    acao = {() => (aoSelecionar("Social", require("../../assets/images/icones_Tela_inicial/iconeSocial.png")))} 
+                    acao = {() => (aoSelecionar("Social", require("../../assets/images/icones_Tela_inicial/iconeSocial.png"), "#DDDD45"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeSocial.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Nutrição" 
-                    acao = {() => (aoSelecionar("Nutrição", require("../../assets/images/icones_Tela_inicial/iconeNutricao.png")))} 
+                    acao = {() => (aoSelecionar("Nutrição", require("../../assets/images/icones_Tela_inicial/iconeNutricao.png"), "#F68616"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeNutricao.png")}/>
                 
                 <OpcoesCategorias 
                     legenda = "Cuidados" 
-                    acao = {() => (aoSelecionar("Cuidados", require("../../assets/images/icones_Tela_inicial/iconeAutoCuidado.png")))} 
+                    acao = {() => (aoSelecionar("Cuidados", require("../../assets/images/icones_Tela_inicial/iconeAutoCuidado.png"), "#BF499E"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeAutoCuidado.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Animais" 
-                    acao = {() => (aoSelecionar("Animais", require("../../assets/images/icones_Tela_inicial/iconeAnimais.png")))} 
+                    acao = {() => (aoSelecionar("Animais", require("../../assets/images/icones_Tela_inicial/iconeAnimais.png"), "#9C664F"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeAnimais.png")}/>
 
                 <OpcoesCategorias 
+                    legenda = "Bem-estar" 
+                    acao = {() => (aoSelecionar("Bem-estar", require("../../assets/images/icones_Tela_inicial/iconeBemEstar.png"), "#FAABDE"))} 
+                    imagem = {require("../../assets/images/icones_Tela_inicial/iconeBemEstar.png")}/>
+
+                <OpcoesCategorias 
                     legenda = "Estudos" 
-                    acao = {() => (aoSelecionar("Estudos", require("../../assets/images/icones_Tela_inicial/iconeEstudos.png")))} 
+                    acao = {() => (aoSelecionar("Estudos", require("../../assets/images/icones_Tela_inicial/iconeEstudos.png"), "#73DCF6"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeEstudos.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Trabalho" 
-                    acao = {() => (aoSelecionar("Trabalho", require("../../assets/images/icones_Tela_inicial/iconeTrabalho.png")))} 
+                    acao = {() => (aoSelecionar("Trabalho", require("../../assets/images/icones_Tela_inicial/iconeTrabalho.png"), "#7A6C5D"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeTrabalho.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Casa" 
-                    acao = {() => (aoSelecionar("Casa", require("../../assets/images/icones_Tela_inicial/iconeCasa.png")))} 
+                    acao = {() => (aoSelecionar("Casa", require("../../assets/images/icones_Tela_inicial/iconeCasa.png"), "#D9B79A"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeCasa.png")}/>
                 
                 <OpcoesCategorias 
                     legenda = "Religião" 
-                    acao = {() => (aoSelecionar("Religião", require("../../assets/images/icones_Tela_inicial/iconeReligiao.png")))} 
+                    acao = {() => (aoSelecionar("Religião", require("../../assets/images/icones_Tela_inicial/iconeReligiao.png"), "#478AA6"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeReligiao.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Esportes" 
-                    acao = {() => (aoSelecionar("Esportes", require("../../assets/images/icones_Tela_inicial/iconeEsportes.png")))} 
+                    acao = {() => (aoSelecionar("Esportes", require("../../assets/images/icones_Tela_inicial/iconeEsportes.png"), "#58B1BB"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeEsportes.png")}/>
 
                 <OpcoesCategorias 
+                    legenda = "Familia" 
+                    acao = {() => (aoSelecionar("Familia", require("../../assets/images/icones_Tela_inicial/iconeFamilia.png"), "#DD3232"))} 
+                    imagem = {require("../../assets/images/icones_Tela_inicial/iconeFamilia.png")}/>
+
+                <OpcoesCategorias 
                     legenda = "Saúde" 
-                    acao = {() => (aoSelecionar("Saúde", require("../../assets/images/icones_Tela_inicial/iconeSaude.png")))} 
+                    acao = {() => (aoSelecionar("Saúde", require("../../assets/images/icones_Tela_inicial/iconeSaude.png"), "#ACD980"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeSaude.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Relação" 
-                    acao = {() => (aoSelecionar("Relação", require("../../assets/images/icones_Tela_inicial/iconeRelacionamento.png")))} 
+                    acao = {() => (aoSelecionar("Relação", require("../../assets/images/icones_Tela_inicial/iconeRelacionamento.png"), "#A52A20"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeRelacionamento.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Lazer" 
-                    acao = {() => (aoSelecionar("Lazer", require("../../assets/images/icones_Tela_inicial/iconeLazer.png")))} 
+                    acao = {() => (aoSelecionar("Lazer", require("../../assets/images/icones_Tela_inicial/iconeLazer.png"), "#FFBF49"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeLazer.png")}/>
 
                 <OpcoesCategorias 
                     legenda = "Natureza" 
-                    acao = {() => (aoSelecionar("Natureza", require("../../assets/images/icones_Tela_inicial/iconeNatureza.png")))} 
+                    acao = {() => (aoSelecionar("Natureza", require("../../assets/images/icones_Tela_inicial/iconeNatureza.png"), "#65B84C"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeNatureza.png")}/>
                 
                 <OpcoesCategorias 
                     legenda = "Financeiro" 
-                    acao = {() => (aoSelecionar("Financeiro", require("../../assets/images/icones_Tela_inicial/iconeFinanceiro.png")))} 
+                    acao = {() => (aoSelecionar("Financeiro", require("../../assets/images/icones_Tela_inicial/iconeFinanceiro.png"), "#D5A62D"))} 
                     imagem = {require("../../assets/images/icones_Tela_inicial/iconeFinanceiro.png")}/>
+
+                <OpcoesCategorias 
+                    legenda = "Outros" 
+                    acao = {() => (aoSelecionar("Outros", require("../../assets/images/icones_Tela_inicial/iconeOutros.png"), "#B184C0"))} 
+                    imagem = {require("../../assets/images/icones_Tela_inicial/iconeOutros.png")}/>
             </View>
 
         </ScrollView>
@@ -555,7 +697,7 @@ export function ObjetoPrioridade({titulo, legenda, numero, acao} : BotaoPriorida
     return(
         <Pressable style = {styles.alinhamentoModalPrioridade} onPress = {acao}>
                     
-            <View style = {[styles.prioridade, {height: 56, width: 56, margin: 12,}]}>
+            <View style = {[styles.prioridade, {height: 50, width: 50, margin: 12,}]}>
 
                 <Text style = {[estiloFontes.displaySmall, {color: "#000"}]}>{numero}</Text>
             
@@ -687,22 +829,26 @@ export function ItemSubtarefa({legenda} : legenda) {
     )
 }
 
-type Semanas = {legenda : string};
+interface Semanas {
+    legenda : string
+    aoSelecionar : (id : string) => void
+    id : string
+};
 
-export function Semanas({legenda} : Semanas) {
+export function Semanas({legenda, aoSelecionar, id} : Semanas) {
 
-    const [corFundo, setCorFundo] = useState("#0F2026");
     const [ativado, setAtivado] = useState(false);
 
+    const pegarValores = () => {
+        aoSelecionar(id);
+    }
+
     return (
-        <Pressable style = {[styles.fundoSemanas, {backgroundColor: corFundo}]} onPress = {() => {
-            setAtivado(!ativado);
-            ativado ?
-            setCorFundo("#D5A62D")
-            :
-            setCorFundo("#0F2026")
-                }
-            }>
+        <Pressable style = {[styles.fundoSemanas, {backgroundColor: ativado ? "#D5A62D" : "#0F2026"}]} onPress = {() => {
+            setAtivado((valorAntigo) => !valorAntigo);
+            
+            pegarValores();
+            }}>
             <Text style = {[estiloFontes.TitleLarge, {fontFamily: "Inter", padding: "3%"}]}>{legenda}</Text>
         </Pressable>
     )

@@ -4,11 +4,12 @@ import { Image, StyleSheet, View } from "react-native";
 import { propsNavigationStack } from "@/tipos/navigation";
 import Index from "./index";
 import Cronograma from "./telas/cronograma";
-import Comunidade from "./telas/comunidade";
 import Login from "./telas/login";
 import Cadastro from "./telas/cadastro";
-import Calendario from "./telas/calendario";
+import Home from "./telas/calendario";
 import Menu from "./telas/menu";
+import Welcome from "./telas/welcome";
+import Time from "./telas/timer";
 
   const Tab = createBottomTabNavigator(); //Cria o componente do menu
 
@@ -59,7 +60,7 @@ export default function RootLayout() {
 
 
 
-        <Tab.Screen name = "telas/comunidade" component={TelaComunidade} options={{title: "", tabBarIcon: ({focused, color, size}) => {
+        <Tab.Screen name = "telas/welcome" component={TelaComunidade} options={{title: "", tabBarIcon: ({focused, color, size}) => {
           let verdadeiro
             
           if (verdadeiro = focused) {
@@ -150,7 +151,7 @@ export function TelaCronograma() {
 export function TelaComunidade() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "Comunidade" component = {Comunidade} />
+      <Stack.Screen name = "Welcome" component = {Welcome} />
       <Stack.Screen name = "Cadastro" component = {Cadastro} />
       <Stack.Screen name = "Login" component = {Login} />
     </Stack.Navigator>
@@ -162,7 +163,7 @@ export function TelaComunidade() {
 export function TelaCalendario() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "Calendario" component = {Calendario} />
+      <Stack.Screen name = "Calendario" component = {Home}/>
     </Stack.Navigator>
   )
 }
@@ -173,6 +174,9 @@ export function TelaMenu() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
       <Stack.Screen name = "Menu" component = {Menu} />
+      <Stack.Screen name = "Timer" component = {Time} />
+      <Stack.Screen name = "Calendario" component = {Home} />
+      <Stack.Screen name = "Login" component = {Login} />
     </Stack.Navigator>
   )
 }

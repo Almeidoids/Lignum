@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
 
     alinhamentoIcones: {
         alignItems: "center",
-        height: "10%",
+        height: "8%",
         marginLeft: "5%",
         marginRight: "5%",
         justifyContent: "space-between"
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     },
 
     conteudoScrollView: {
-        maxHeight: "130%",
+        maxHeight: "150%",
         width: "100%",
         flexDirection: "row",
         flexWrap: "wrap",
@@ -117,8 +117,8 @@ const styles = StyleSheet.create({
 
     prioridade: {
         backgroundColor: "#D5A62D",
-        height: 70,
-        width: 70,
+        height: 60,
+        width: 60,
         alignItems: "center",
         justifyContent: "center",
         shadowColor: "#000",
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
 
     dataAlvo: {
         marginTop: 5,
-        height: 65,
+        height: 55,
         width: 170,
         backgroundColor: "#25343A",
         borderColor: "#fff",
@@ -261,6 +261,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         borderRadius: 10,
         },
+
+    botao_voltar: {
+        marginTop: "10%",
+        marginLeft: "80%",
+        zIndex: 10,
+    }
 
 })
 
