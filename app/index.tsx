@@ -7,6 +7,8 @@ import { useState, useEffect, SetStateAction, Dispatch } from "react";
 import { Text, RadioButton } from "react-native-paper" //npx expo install react-native-paper; npx expo install react-native-safe-area-context; npx expo install react-native-vector-icons
 import SobreposicaoNovaTarefa from "./modais/sobreposicaoNovaTarefa";
 import { SplashScreen } from "expo-router";
+import { requestPermissionsAsync, setNotificationHandler, scheduleNotificationAsync, DailyTriggerInput } from "expo-notifications";
+import asyncStorage from "@react-native-async-storage/async-storage"
 
 interface Informacoes {
   id : string;
@@ -52,15 +54,127 @@ export default function Index() {
    
    const [dataSabado, setDataSabado] = useState<Informacoes[]>([]);
 
+   const [progresso, setProgresso] = useState(0);
+
+   const [totalProgresso, setTotalProgresso] = useState(0);
+
+   const [resultadoProgresso, setResultadoProgresso] = useState(0)
   const [FontesCarregadas] = useFonts({ //Essa variavel faz a importação com as fontes
     "Julius-Sans-One": require("../assets/fonts/JuliusSansOne-Regular.ttf"),
     "Inter": require("../assets/fonts/Inter/static/Inter-Regular.ttf"),
   })
 
   if (!FontesCarregadas) { //Código feito para carregar uma tela de carregamento enquanto as fontes estão sendo carregadas... Acho que não funciona, mas deixei aqui mesmo assim
+    
     SplashScreen.hideAsync();
   }
 
+  const armazenar = (chave : string, valor : Informacoes[]) => {
+    const listaString = JSON.stringify(valor)
+    asyncStorage.setItem(chave, listaString);
+  }
+
+  const buscar = async (chave : string) => {
+    try {
+      const valor = await asyncStorage.getItem(chave);
+      if (valor !== null) {
+        const resultado = JSON.parse(valor)
+        if (chave === "0") {
+          setDataDomingo(resultado);
+        }
+
+        else if (chave === "1") {
+          setDataSegunda(resultado);
+        }
+
+        else if (chave === "2") {
+          setDataTerca(resultado);
+        }
+
+        else if (chave === "3") {
+          setDataQuarta(resultado);
+        }
+
+        else if (chave === "4") {
+          setDataQuinta(resultado);
+        }
+
+        else if (chave === "5") {
+          setDataSexta(resultado);
+        }
+
+        else if (chave === "6") {
+          setDataSabado(resultado);
+        }
+      }
+    }
+    catch (e) {
+      console.log(e);
+    }
+  }
+
+  useEffect(() => {
+    buscar("0");
+    buscar("1");
+    buscar("2");
+    buscar("3");
+    buscar("4");
+    buscar("5");
+    buscar("6");
+  }, [])
+
+  useEffect(() => {
+    armazenar("0", dataDomingo)
+    armazenar("1", dataSegunda)
+    armazenar("2", dataTerca)
+    armazenar("3", dataQuarta)
+    armazenar("4", dataQuinta)
+    armazenar("5", dataSexta)
+    armazenar("6", dataSabado)
+
+    switch (dayjs().day()) {
+      case 0:
+        setProgresso(dataDomingo.filter(item => item.status).length)
+        setTotalProgresso(dataDomingo.length)
+        setResultadoProgresso(dataDomingo.filter(item => item.status).length * 100 / dataDomingo.length / 100)
+        break;
+      case 1:
+        setProgresso(dataSegunda.filter(item => item.status).length)
+        setTotalProgresso(dataSegunda.length)
+        setResultadoProgresso(dataSegunda.filter(item => item.status).length * 100 / dataSegunda.length / 100)
+        break;
+      
+      case 2:
+        setProgresso(dataTerca.filter(item => item.status).length)
+        setTotalProgresso(dataTerca.length)
+        setResultadoProgresso(dataTerca.filter(item => item.status).length * 100 / dataTerca.length / 100)
+        break;
+
+      case 3:
+        setProgresso(dataQuarta.filter(item => item.status).length)
+        setTotalProgresso(dataQuarta.length)
+        setResultadoProgresso(dataQuarta.filter(item => item.status).length * 100 / dataQuarta.length / 100)
+        break;
+
+      case 4:
+        setProgresso(dataQuinta.filter(item => item.status).length)
+        setTotalProgresso(dataQuinta.length)
+        setResultadoProgresso(dataQuinta.filter(item => item.status).length * 100 / dataQuinta.length / 100)
+        break;
+
+      case 5:
+        setProgresso(dataSexta.filter(item => item.status).length)
+        setTotalProgresso(dataSexta.length)
+        setResultadoProgresso(dataSexta.filter(item => item.status).length * 100 / dataSexta.length / 100)
+        break;
+
+      case 6:
+        setProgresso(dataSabado.filter(item => item.status).length)
+        setTotalProgresso(dataSabado.length)
+        setResultadoProgresso(dataSabado.filter(item => item.status).length * 100 / dataSabado.length / 100)
+        break;
+    }
+  }, [dataDomingo, dataSegunda, dataTerca, dataQuarta, dataQuinta, dataSexta])
   //Seção super dificil de explicar, se possivel não mexer, somente caso necessário. Faz o controle da data
   const atualizarDias = (incremento : number) => {
     setDias(controleDia => {
@@ -89,187 +203,227 @@ export default function Index() {
     return () => clearInterval(intervalo);
   }, [])
 
+  async function mandarNotificacaoDiaria() {
+    const {status} = await requestPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permissões para enviar notificações negada");
+    }
+    else {
+      setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldSetBadge: true,
+          shouldPlaySound: false
+        })
+      })
+
+      scheduleNotificationAsync({
+        content: {
+          title: "O dia começou...",
+          body: "Vamos tomar café e realizar nossas tarefas.",
+        },
+        trigger: {hour: 10, minute: 0o0, repeats: true}
+      })
+
+      scheduleNotificationAsync({
+        content: {
+          title: "Metade do dia já se foi",
+          body: "Já realizou todas suas tarefas?",
+        },
+        trigger: {hour: 16, minute: 0o0, repeats: true}
+      })
+
+      scheduleNotificationAsync({
+        content: {
+          title: "Hora de dormir",
+          body: "Nada melhor do que uma boa noite de sono",
+        },
+        trigger: {hour: 20, minute: 0o0, repeats: true}
+      })
+    }
+  }
+
    const pegarPropsSobreposicao = (novoNome : string, novaCategoria : string, novoBackgroundCategoria : string, novaImagemCard : ImageSourcePropType | undefined, novaPrioridade : number, 
                                   novaData : string, NovoPendente : boolean, novaDescricao : string, novaSemana : string[], novoHorario : string, horarioCriado : Dayjs) => {
-                                    let numAleatorio = Math.random() * 1000
-                                    
-                                    setSemana(novaSemana);
+        let numAleatorio = Math.random() * 1000
+        
+        setSemana(novaSemana);
 
-                                    /*console.log(novoNome);
-                                    console.log(novaCategoria);
-                                    console.log(novoBackgroundCategoria);
-                                    console.log(novaImagemCard);
-                                    console.log(novaPrioridade);
-                                    console.log(novaData);
-                                    */console.log(NovoPendente);
-                                    /*console.log(novaDescricao);
-                                    console.log(novaSemana);
-                                    console.log(novoHorario);
-*/
-                                    const NovoItem : Informacoes = {
-                                      id : numAleatorio.toString(),
-                                      nome: novoNome,
-                                      categoria: novaCategoria,
-                                      backgroundCategoria: novoBackgroundCategoria,
-                                      data: novaData,
-                                      descricao: novaDescricao,
-                                      Horario: novoHorario,
-                                      imagemCard: novaImagemCard,
-                                      pendente: NovoPendente,
-                                      prioridade: novaPrioridade,
-                                      status : status,
-                                      horarioCriado : horarioCriado
-                                    };
+        /*console.log(novoNome);
+        console.log(novaCategoria);
+        console.log(novoBackgroundCategoria);
+        console.log(novaImagemCard);
+        console.log(novaPrioridade);
+        console.log(novaData);
+        */console.log(NovoPendente);
+        /*console.log(novaDescricao);
+        console.log(novaSemana);
+        console.log(novoHorario);
+  */
+        const NovoItem : Informacoes = {
+          id : numAleatorio.toString(),
+          nome: novoNome,
+          categoria: novaCategoria,
+          backgroundCategoria: novoBackgroundCategoria,
+          data: novaData,
+          descricao: novaDescricao,
+          Horario: novoHorario,
+          imagemCard: novaImagemCard,
+          pendente: NovoPendente,
+          prioridade: novaPrioridade,
+          status : status,
+          horarioCriado : horarioCriado
+        };
 
-                                    setSobreposicaoVisivel(false);
+        setSobreposicaoVisivel(false);
 
-                                    if (novaSemana.length >= 1) {
-                                      novaSemana.forEach(function(valor) {
-                                        console.log(valor);
-                                        if (valor === "domingo") {
-                                          NovoItem.horarioCriado = NovoItem.horarioCriado.day(0);
-                                          setDataDomingo((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        }
+        if (novaSemana.length >= 1) {
+          novaSemana.forEach(function(valor) {
+            console.log(valor);
+            if (valor === "domingo") {
+              NovoItem.horarioCriado = NovoItem.horarioCriado.day(0);
+              setDataDomingo((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            }
 
-                                        else if (valor === "segunda") {
-                                          NovoItem.horarioCriado = NovoItem.horarioCriado.day(1);
-                                          setDataSegunda((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        }
+            else if (valor === "segunda") {
+              NovoItem.horarioCriado = NovoItem.horarioCriado.day(1);
+              setDataSegunda((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            }
 
-                                        else if (valor === "terca") {
-                                          NovoItem.horarioCriado = NovoItem.horarioCriado.day(2);
-                                          setDataTerca((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        }
-                                        
-                                        else if (valor === "quarta") {
-                                          NovoItem.horarioCriado = NovoItem.horarioCriado.day(3);
-                                          setDataQuarta((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        }
+            else if (valor === "terca") {
+              NovoItem.horarioCriado = NovoItem.horarioCriado.day(2);
+              setDataTerca((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            }
+            
+            else if (valor === "quarta") {
+              NovoItem.horarioCriado = NovoItem.horarioCriado.day(3);
+              setDataQuarta((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            }
 
-                                        else if (valor === "quinta") {
-                                          NovoItem.horarioCriado = NovoItem.horarioCriado.day(4);
-                                          setDataQuinta((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        }
+            else if (valor === "quinta") {
+              NovoItem.horarioCriado = NovoItem.horarioCriado.day(4);
+              setDataQuinta((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            }
 
-                                        else if (valor === "sexta") {
-                                          NovoItem.horarioCriado = NovoItem.horarioCriado.day(5);
-                                          setDataSexta((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        }
+            else if (valor === "sexta") {
+              NovoItem.horarioCriado = NovoItem.horarioCriado.day(5);
+              setDataSexta((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            }
 
-                                        else if (valor === "sabado") {
-                                          NovoItem.horarioCriado = NovoItem.horarioCriado.day(6);
-                                          setDataSabado((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        }                                      
-                                      })
-                                    }
+            else if (valor === "sabado") {
+              NovoItem.horarioCriado = NovoItem.horarioCriado.day(6);
+              setDataSabado((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            }                                      
+          })
+        }
 
-                                    else {
-                                      if (dias.day() === 0) {
-                                        NovoItem.horarioCriado = NovoItem.horarioCriado.day(0);
-                                        setDataDomingo((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                        console.log(dataDomingo);
-                                      }
+        else {
+          if (dias.day() === 0) {
+            NovoItem.horarioCriado = NovoItem.horarioCriado.day(0);
+            setDataDomingo((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+            console.log(dataDomingo);
+          }
 
-                                      if (dias.day() === 1) {
-                                        NovoItem.horarioCriado = NovoItem.horarioCriado.day(1);
-                                        setDataSegunda((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                      }
+          if (dias.day() === 1) {
+            NovoItem.horarioCriado = NovoItem.horarioCriado.day(1);
+            setDataSegunda((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+          }
 
-                                      if (dias.day() === 2) {
-                                        NovoItem.horarioCriado = NovoItem.horarioCriado.day(2);
-                                        setDataTerca((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                      }
+          if (dias.day() === 2) {
+            NovoItem.horarioCriado = NovoItem.horarioCriado.day(2);
+            setDataTerca((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+          }
 
-                                      if (dias.day() === 3) {
-                                        NovoItem.horarioCriado = NovoItem.horarioCriado.day(3);
-                                        setDataQuarta((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                      }
+          if (dias.day() === 3) {
+            NovoItem.horarioCriado = NovoItem.horarioCriado.day(3);
+            setDataQuarta((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+          }
 
-                                      if (dias.day() === 4) {
-                                        NovoItem.horarioCriado = NovoItem.horarioCriado.day(4);
-                                        setDataQuinta((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                      }
+          if (dias.day() === 4) {
+            NovoItem.horarioCriado = NovoItem.horarioCriado.day(4);
+            setDataQuinta((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+          }
 
-                                      if (dias.day() === 5) {
-                                        NovoItem.horarioCriado = NovoItem.horarioCriado.day(5);
-                                        setDataSexta((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                      }
+          if (dias.day() === 5) {
+            NovoItem.horarioCriado = NovoItem.horarioCriado.day(5);
+            setDataSexta((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+          }
 
-                                      if (dias.day() === 6) {
-                                        NovoItem.horarioCriado = NovoItem.horarioCriado.day(6);
-                                        setDataSabado((valorAntigo) => {
-                                          let valor = [...valorAntigo, NovoItem];
-                                          valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
-                                                  ...valor.filter(item => item.status),];
-                                          return valor;
-                                        })
-                                      }
-                                    }
+          if (dias.day() === 6) {
+            NovoItem.horarioCriado = NovoItem.horarioCriado.day(6);
+            setDataSabado((valorAntigo) => {
+              let valor = [...valorAntigo, NovoItem];
+              valor = [...valor.filter(item => !item.status).sort((a, b) => a.prioridade - b.prioridade),
+                      ...valor.filter(item => item.status),];
+              return valor;
+            })
+          }
+        }
       }
 
   const atualizar = (id: string) => {
@@ -461,6 +615,8 @@ export default function Index() {
     }
   }
 
+  mandarNotificacaoDiaria();
+
    //a partir do return, começa a parte mais de design, as views formam a cor de fundo, o card, e assim vai...
   return (
     <View style = {{backgroundColor: "#25343A", flex: 1, }}>  
@@ -481,8 +637,8 @@ export default function Index() {
         
         <View style = {styles.tarefas}>
           <Text variant = "titleLarge" style = {[styles.titleLarge]}>Tarefas</Text>
-          <Text variant = "bodySmall" style = {[styles.bodySmall, { color: "#fff" }]}>0/10 Tarefas</Text>
-          <Progress.Bar progress= {0.5} width = {100} color = "#5D4EBF" unfilledColor = "#DEEFF1" />
+          <Text variant = "bodySmall" style = {[styles.bodySmall, { color: "#fff" }]}>{progresso}/{totalProgresso} Tarefas</Text>
+          <Progress.Bar progress = {resultadoProgresso} width = {100} color = "#5D4EBF" unfilledColor = "#DEEFF1" />
         </View>
       </View>
 
@@ -499,7 +655,7 @@ export default function Index() {
           />
         //}
         }
-        { dias.isSame(dayjs().day(1), "day") &&
+        { dias.day() === 1 &&
           <FlatList
           data = {dataSegunda}
           ListEmptyComponent={<Text style = {[styles.titleLarge, {textAlign: "center", verticalAlign: "middle"}]}>Você ainda não colocou nenhuma tarefa</Text>}
@@ -511,7 +667,7 @@ export default function Index() {
           />
         }
 
-        { dias.isSame(dayjs().day(2), "day") &&
+        { dias.day() === 2 &&
           <FlatList
           data = {dataTerca}
           ListEmptyComponent={<Text style = {[styles.titleLarge, {textAlign: "center", verticalAlign: "middle"}]}>Você ainda não colocou nenhuma tarefa</Text>}
@@ -523,7 +679,7 @@ export default function Index() {
           />
         }
 
-        { dias.isSame(dayjs().day(3), "day") &&
+        { dias.day() === 3 &&
           <FlatList
           data = {dataQuarta}
           ListEmptyComponent={<Text style = {[styles.titleLarge, {textAlign: "center", verticalAlign: "middle"}]}>Você ainda não colocou nenhuma tarefa</Text>}
@@ -535,7 +691,7 @@ export default function Index() {
           />
         }
 
-        { dias.isSame(dayjs().day(4), "day") &&
+        { dias.day() === 4 &&
           <FlatList
           data = {dataQuinta}
           ListEmptyComponent={<Text style = {[styles.titleLarge, {textAlign: "center", verticalAlign: "middle"}]}>Você ainda não colocou nenhuma tarefa</Text>}
@@ -547,7 +703,7 @@ export default function Index() {
           />
         }
 
-        { dias.isSame(dayjs().day(5), "day") &&
+        { dias.day() === 5 &&
           <FlatList
           data = {dataSexta}
           ListEmptyComponent={<Text style = {[styles.titleLarge, {textAlign: "center", verticalAlign: "middle"}]}>Você ainda não colocou nenhuma tarefa</Text>}
@@ -559,7 +715,7 @@ export default function Index() {
           />
         }
 
-        { dias.isSame(dayjs().day(6), "day") &&
+        { dias.day() === 6 &&
           <FlatList
           data = {dataSabado}
           ListEmptyComponent={<Text style = {[styles.titleLarge, {textAlign: "center", verticalAlign: "middle"}]}>Você ainda não colocou nenhuma tarefa</Text>}
@@ -656,6 +812,11 @@ export function Modos({imagem, titulo, descricao, acao} : AdicionarProps) {
 
 //Esta função é o design do Card de tarefa, obviamente ele ainda não está aparecendo na tela... Será aplicado em uma atualização futura
 export function Cards({item, atualizar} : {item : Informacoes, atualizar : (id : string) => void})  {  
+  useEffect(() => {
+    if (item.Horario !== "") {
+      notificacoesAgendadas(item.Horario, item.nome, item.horarioCriado)
+    }
+  }, []);
   return (
     <View>
 
@@ -666,7 +827,8 @@ export function Cards({item, atualizar} : {item : Informacoes, atualizar : (id :
           <Text style = {[styles.headlineSmall]}>{item.nome}</Text>
 
           <View style = {{flexDirection: "row", alignItems: "center"}}>
-          <Text style = {[styles.titleLarge, {paddingTop: 0}]}>{item.prioridade}</Text>
+          <Text style = {[styles.titleLarge, {paddingTop: 0}]}>{item.Horario}</Text>
+          <Text style = {[styles.titleLarge, {paddingTop: 0, paddingLeft: 10}]}>{item.prioridade}</Text>
           <Image source = {require("../assets/images/icones_Tela_inicial/iconePrioridade.png")} style = {{height: 20, width: 20}} />
           </View>
         </View>
@@ -684,9 +846,17 @@ export function Cards({item, atualizar} : {item : Informacoes, atualizar : (id :
   );
 }
 
-function pendente(data : Informacoes[], tempoLimite : number) {
-  setInterval(() => {
-    data = (data.filter(item => dayjs().diff(item.horarioCriado, "minute") < tempoLimite))
+async function notificacoesAgendadas(horario : string, nome : string, data : Dayjs) {
+  const textoHorarioNotificacao = horario.split(":");
+  console.log(textoHorarioNotificacao)
+  data = data.set("hour", Number(textoHorarioNotificacao[0])).set("minute", Number(textoHorarioNotificacao[1]));
+  console.log(data.toDate().valueOf());
+  scheduleNotificationAsync({
+    content: {
+      title: "Hora de realizar sua tarefa",
+      body: nome,
+    },
+    trigger: {date: data.toDate().valueOf()}
   })
 }
 

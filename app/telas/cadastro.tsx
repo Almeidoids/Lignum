@@ -1,16 +1,54 @@
-import React from 'react';
-import {View, Text, StyleSheet, TextInput, TouchableOpacity, Image} from 'react-native';
+import React, { useState } from 'react';
+import {View, Alert, Text, StyleSheet, TextInput, TouchableOpacity, Image, ActivityIndicator} from 'react-native';
 import * as Animatable from 'react-native-animatable'
 import { useNavigation } from '@react-navigation/native';
-import { propsStack } from '../../tipos/navigation';
-import { Colors } from '../../constants/Colors';
+import { propsStack } from '@/tipos/navigation';
+import { Colors } from '@/constants/Colors';
 import {MaterialIcons} from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { set } from 'react-hook-form';
 
  // P/ criar um botão q volte p/ a tela anterior, "onPress={() => navigation.goBack()}>"...
 
 export default function Cadastro() {
 
     const navigation = useNavigation<propsStack>()
+
+    const [name, setName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [pass, setPass] = useState<string>('');
+    const [ready, setReady] = useState<boolean>(false);
+
+    const [loading, setLoading] = useState(false);
+
+    const handleCreateUser = async() => {
+
+        if (name == '' || email == '' || pass == '') {
+
+            Alert.alert('Campos Obrigatórios', 'Preencha os Campos');
+
+        }
+
+        else {
+
+            await AsyncStorage.setItem('@asyncStorage:nameUser', name);
+            await AsyncStorage.setItem('@asyncStorage:emailUser', email);
+            await AsyncStorage.setItem('@asyncStorage:passUser', pass);
+
+            setLoading(true);
+
+            setReady(true);
+            setTimeout(() => {
+
+                setReady(false);
+                navigation.navigate('Login');
+
+            }, 2500);
+
+            console.log(name, email, pass);
+
+        }
+    };
 
     return (
 
@@ -54,6 +92,7 @@ export default function Cadastro() {
                 autoCorrect = {false}
                 autoCapitalize = 'none'
                 secureTextEntry = {false}
+                onChangeText={(t) => setName(t)}
 
                 />
                 
@@ -77,6 +116,7 @@ export default function Cadastro() {
                 autoCorrect = {false}
                 autoCapitalize = 'none'
                 secureTextEntry = {false}
+                onChangeText={(t) => setEmail(t)}
 
                 />
                 
@@ -100,6 +140,7 @@ export default function Cadastro() {
                 autoCorrect = {false}
                 autoCapitalize = 'none'
                 secureTextEntry = {true}
+                onChangeText={(t) => setPass(t)}
 
                 />
                 
@@ -117,8 +158,15 @@ export default function Cadastro() {
 
             <Animatable.View animation = "fadeInUp" delay={1000}>
 
-                <TouchableOpacity style = {styles.button}>
-                    <Text style = {styles.buttonText}>Acessar</Text>
+                <TouchableOpacity style = {styles.button} onPress = {handleCreateUser}>
+
+                    {!loading ? (
+                        <Text style = {styles.buttonText}>
+                            Acessar
+                        </Text>)
+                    :
+                    (<ActivityIndicator color={'#FFFFFF'} size={20} />)}
+
                 </TouchableOpacity>
 
             </Animatable.View>

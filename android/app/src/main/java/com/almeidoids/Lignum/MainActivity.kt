@@ -17,6 +17,9 @@ class MainActivity : ReactActivity() {
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
     super.onCreate(null)
+    override fun onCreate(savedInstanceState: Bundle?) {
+      super.onCreate(null)
+    }
   }
 
   /**

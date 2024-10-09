@@ -10,6 +10,7 @@ import Home from "./telas/calendario";
 import Menu from "./telas/menu";
 import Welcome from "./telas/welcome";
 import Time from "./telas/timer";
+import Comunidade from "./telas/comunidade";
 
   const Tab = createBottomTabNavigator(); //Cria o componente do menu
 
@@ -53,14 +54,14 @@ export default function RootLayout() {
           }
           else {
             return(
-              <Image source = {require("../assets/images/icones_Tela_inicial/íconeTelaCronograma.png")} style = {styles.imagem}/>
+              <Image source = {require("../assets/images/icones_Tela_inicial/íconeTelaCronograma.png")} style = {styles.imagem}  />
             )
           }
         }}} />
 
 
 
-        <Tab.Screen name = "telas/welcome" component={TelaComunidade} options={{title: "", tabBarIcon: ({focused, color, size}) => {
+        <Tab.Screen name = "telas/login" component={TelaComunidade} options={{title: "", tabBarIcon: ({focused, color, size}) => {
           let verdadeiro
             
           if (verdadeiro = focused) {
@@ -130,7 +131,8 @@ const Stack = createNativeStackNavigator(); //é aquele espaço branco que apare
 //A mesma coisa vale para as outras funções das outras telas
 export function TelaInicial() {
   return (
-    <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
+    <Stack.Navigator initialRouteName="Welcome" screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
+      <Stack.Screen name = "Welcome" component = {Welcome} />
       <Stack.Screen name = "Index" component = {Index} />
     </Stack.Navigator>
   )
@@ -151,9 +153,9 @@ export function TelaCronograma() {
 export function TelaComunidade() {
   return (
     <Stack.Navigator screenOptions = {{headerShown: false, navigationBarHidden: true, statusBarTranslucent: true}}>
-      <Stack.Screen name = "Welcome" component = {Welcome} />
       <Stack.Screen name = "Cadastro" component = {Cadastro} />
       <Stack.Screen name = "Login" component = {Login} />
+      <Stack.Screen name = "Comunidade" component = {Comunidade} />
     </Stack.Navigator>
   )
 }
@@ -176,7 +178,7 @@ export function TelaMenu() {
       <Stack.Screen name = "Menu" component = {Menu} />
       <Stack.Screen name = "Timer" component = {Time} />
       <Stack.Screen name = "Calendario" component = {Home} />
-      <Stack.Screen name = "Login" component = {Login} />
+      <Stack.Screen name = "Comunidade" component = {Comunidade} />
     </Stack.Navigator>
   )
 }

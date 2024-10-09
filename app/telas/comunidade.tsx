@@ -42,7 +42,7 @@ const PostItem: React.FC<{ item: Post; onImagePress: (uri: string) => void; time
                     <Text style={styles.icon}>{item.likedByUser ? '❤️' : '🤍'}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => onReport(item.id)}>
-                    <Text style={styles.icon}>🚨</Text>
+                    <Text style={styles.icon}>❕</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -72,7 +72,7 @@ const Comunidade: React.FC = () => {
 
         const newPost: Post = {
             id: Math.random().toString(),
-            user: 'User123',
+            user: 'Lignum',
             status: newPostText,
             image: imageUri || '',
             createdAt: Date.now(),

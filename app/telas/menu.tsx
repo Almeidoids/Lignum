@@ -78,7 +78,7 @@ const MainScreen: React.FC = () => {
         <GridItem icon={require('../../assets/images/iconesCellbit/financeiro.png')} label="FINANCEIRO" acao = {() => console.log("Financeiro")} />
         <GridItem icon={require('../../assets/images/iconesCellbit/timer.png')} label="TIMER" acao = {() => navigation.navigate("Timer")} />
         <GridItem icon={require('../../assets/images/iconesCellbit/calendario.png')} label="CALENDÁRIO" acao = {() => navigation.navigate("Calendario")} />
-        <GridItem icon={require('../../assets/images/iconesCellbit/comunidade.png')} label="COMUNIDADE" acao = {() => navigation.navigate("Login")} />
+        <GridItem icon={require('../../assets/images/iconesCellbit/comunidade.png')} label="COMUNIDADE" acao = {() => navigation.navigate("Comunidade")} />
         <GridItem icon={require('../../assets/images/iconesCellbit/cronograma.png')} label="CRONOGRAMAS" acao = {() => console.log("Cronograma")} />
       </View>
     </View>
